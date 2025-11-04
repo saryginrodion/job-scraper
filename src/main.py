@@ -13,6 +13,7 @@ from services.notifiers.telegram_notifier_verbose import TelegramNotifierVerbose
 from services.scraper_notifier_orchestrator.orchestrator import ScraperNotifierOrchestrator
 from services.scrapers.dummy.scraper import DummyScraper
 from services.scrapers.habr.scraper import HabrScraper
+from services.scrapers.headhunter.scraper import HeadHunterScraper
 from utils.telegram_sender import TelegramSender
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ async def main() -> None:
 
     scrapers: list[IScraper] = [
         HabrScraper(repository),
+        HeadHunterScraper(repository),
         # DummyScraper(repository),
     ]
 
@@ -47,7 +49,7 @@ async def main() -> None:
     while True:
         logger.info("Started scraping...")
         await o.scrape_and_notify()
-        await asyncio.sleep(180.0)
+        await asyncio.sleep(3600.0)
 
 
 if __name__ == "__main__":
