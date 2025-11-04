@@ -9,7 +9,17 @@ All scrapers is based on `src.core.interfaces.scraper.IScraper` class
 You can watch examples of scrapers in `src/services/scrapers` (They are using helper class `src.services.scrapers.BaseScraper.BaseScraper`)
 
 ## VacancyNotifiers
-All scrapers is based on `src.core.interfaces.vacancy_notifier.IVacancyNotifier` class
+Vacancy notifiers notifying about passed vacancies to them
+All notifiers is based on `src.core.interfaces.vacancy_notifier.IVacancyNotifier` class
+
+You can watch examples of notifiers in `src/services/notifiers`
+
+## ScraperNotifierOrchestrator
+orchestrates scrapers and notifiers by this order:
+
+- Running all scrapers
+- Saving fetched vacancies in vacancy repository
+- Running all notifiers with scraped vacancies
 
 # How to run
 - Set up `.env` file in root directory of this repository (template: `.env.example`)
