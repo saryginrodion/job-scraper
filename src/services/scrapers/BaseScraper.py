@@ -39,6 +39,7 @@ class BaseScraper(IScraper):
 
         pages = self.page_number_generator()
         while True:
+            # TODO: it can be None?
             page = next(pages)
 
             fetched_vacancies: list[Vacancy] = await async_exception_suppress(
@@ -46,7 +47,7 @@ class BaseScraper(IScraper):
                 logger=self._logger,
                 loglevel=logging.WARNING,
                 default=[],
-            )(self._fetch_vacancies)(endpoint, page)  # type: ignore
+            )(self.fetch_vacancies)(endpoint, page)  # type: ignore
 
             extend_list: list[Vacancy] = []
 
@@ -68,7 +69,7 @@ class BaseScraper(IScraper):
         return await self._repository.by_source_vacancy_id(self.__class__.__name__, source_vacancy_id) is not None
 
     @abstractmethod
-    async def _fetch_vacancies(self, url: str, page: int) -> list[Vacancy]:
+    async def fetch_vacancies(self, url: str, page: int) -> list[Vacancy]:
         pass
 
     @abstractmethod

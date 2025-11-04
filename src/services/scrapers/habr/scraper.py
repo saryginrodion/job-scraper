@@ -28,7 +28,7 @@ class HabrScraper(BaseScraper):
 
     @override
     @async_retry(retries=3)
-    async def _fetch_vacancies(self, url: str, page: int) -> list[Vacancy]:
+    async def fetch_vacancies(self, url: str, page: int) -> list[Vacancy]:
         url = url + f"&page={page}"
 
         logger.info("Fetching " + url)
