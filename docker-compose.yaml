@@ -1,27 +1,33 @@
+version: "3.9"
+
 services:
   mongodb:
-    image: mongo:latest
+    # Use ARM-compatible 6.0 version for Raspberry Pi; works on x86 too
+    image: mongo:6.0
     container_name: mongodb
+    platform: ${MONGO_PLATFORM:-}  # optional override for dev machine
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
       MONGO_INITDB_DATABASE: vacancies
     ports:
-      - "27017:27017"   # host:container — change the left side to set host port
+      - "27017:27017"
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
 
   redis:
-    image: redis:latest
+    image: redis:7.2-alpine  # Alpine is small and works on ARM & x86
     container_name: redis
+    platform: ${REDIS_PLATFORM:-} # optional override
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
 
 volumes:
   mongo_data:
-
   redis_data:
+
