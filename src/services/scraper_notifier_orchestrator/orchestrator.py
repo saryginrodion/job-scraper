@@ -1,0 +1,66 @@
+import asyncio
+import logging
+
+from core.interfaces.scraper import IScraper
+from core.interfaces.vacancy_notifier import IVacancyNotifier
+from core.interfaces.vacancy_repository import IVacancyRepository
+from core.types.vacancy import Vacancy
+from utils.exception_suppress import async_exception_suppress
+from utils.remove_duplicates import remove_duplicates
+
+logger = logging.getLogger(__name__)
+
+
+class ScraperNotifierOrchestrator:
+    def __init__(self, scrapers: list[IScraper], notifiers: list[IVacancyNotifier], vacancy_repostory: IVacancyRepository) -> None:
+        self._scrapers = scrapers
+        self._notifiers = notifiers
+        self._repository = vacancy_repostory
+
+    async def scrape(self) -> list[Vacancy]:
+        logger.info("Started scraping...")
+        vacancies: list[Vacancy] = []
+
+        coroutines = [
+            async_exception_suppress(Exception, logger=logger, default=[])(
+                s.fetch_new_vacancies,
+            )()
+            for s in self._scrapers
+        ]
+
+        fetched_vacancies = await asyncio.gather(*coroutines)
+
+        for vacancy_list in fetched_vacancies:
+            vacancies.extend(vacancy_list)  # type: ignore
+
+        vacancies_no_duplicates = list(remove_duplicates(vacancies, lambda x: x.source_id))
+
+        logger.info(f"Scraped {len(vacancies_no_duplicates)} unique vacancies from {len(self._scrapers)} scrapers")
+        return vacancies_no_duplicates
+
+    async def notify(self, vacancies: list[Vacancy]) -> None:
+        logger.info(f"Starting notifying about {len(vacancies)} vacancies")
+
+        coroutines = [
+            async_exception_suppress(Exception, logger=logger, loglevel=logging.WARNING)(
+                n.notify
+            )(vacancies)
+            for n in self._notifiers
+        ]
+
+        await asyncio.gather(*coroutines)
+
+        logger.info("Notification ended")
+
+    async def scrape_and_notify(self) -> None:
+        try:
+            vacancies = await self.scrape()
+            if len(vacancies) == 0:
+                logger.info("Scraped 0 vacancies!")
+                return
+            await self._repository.save_vacancies(vacancies)
+            await self.notify(vacancies)
+
+            logger.info("Ended scrape_and_notify")
+        except Exception as e:
+            logger.error(e)

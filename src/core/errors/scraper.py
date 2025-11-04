@@ -1,0 +1,2 @@
+class ScraperFetchError(Exception):
+    pass
