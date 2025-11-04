@@ -1,8 +1,8 @@
 import logging
 
-from env.env_vars import env
-from log.telegram_handler import TelegramLoggingHandler
-from utils.telegram_sender import TelegramSender
+from src.env.env_vars import env
+from src.log.telegram_handler import TelegramLoggingHandler
+from src.utils.telegram_sender import TelegramSender
 
 _loglevel_map = {
         "DEBUG": logging.DEBUG,

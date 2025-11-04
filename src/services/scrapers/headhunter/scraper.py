@@ -1,17 +1,16 @@
 import json
 import logging
-import re
 from http import HTTPStatus
 from typing import override
 
 import httpx
 from bs4 import BeautifulSoup
 
-from core.errors.scraper import ScraperFetchError
-from core.interfaces.vacancy_repository import IVacancyRepository
-from core.types.vacancy import Vacancy
-from services.scrapers.BaseScraper import BaseScraper
-from utils.retry import async_retry
+from src.core.errors.scraper import ScraperFetchError
+from src.core.interfaces.vacancy_repository import IVacancyRepository
+from src.core.types.vacancy import Vacancy
+from src.services.scrapers.BaseScraper import BaseScraper
+from src.utils.retry import async_retry
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ class HeadHunterScraper(BaseScraper):
             headers=self.HEADERS,
             cookies=self.COOKIES,
             timeout=25,
-            follow_redirects=True,  # ✅ as you requested
+            follow_redirects=True,
         )
 
     @override
@@ -82,7 +81,7 @@ class HeadHunterScraper(BaseScraper):
 
         logger.info(f"Fetching HH: {full_url}")
 
-        resp = await self._client.get(full_url, follow_redirects=True)
+        resp = await self._client.get(full_url)
 
         if resp.status_code != HTTPStatus.OK:
             logger.error(f"HH fetch failed: {resp.status_code}")

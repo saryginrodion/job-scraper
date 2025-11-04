@@ -1,5 +1,6 @@
 [project]
 name = "job-scraper"
+packages = ["src"]
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -11,4 +12,5 @@ dependencies = [
     "pydantic>=2.12.3",
     "pydantic-settings>=2.11.0",
     "pymongo>=4.15.3",
+    "redis>=7.0.1",
 ]

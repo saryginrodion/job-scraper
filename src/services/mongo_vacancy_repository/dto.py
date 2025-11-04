@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from core.types.vacancy import Vacancy
+from src.core.types.vacancy import Vacancy
 
 
 class VacancyDTO(BaseModel):

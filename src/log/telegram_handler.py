@@ -2,8 +2,8 @@ import asyncio
 import logging
 import traceback
 
-from utils.telegram import escape_markdown_v2
-from utils.telegram_sender import TelegramSender
+from src.utils.telegram import escape_markdown_v2
+from src.utils.telegram_sender import TelegramSender
 
 _level_emoji_mapper = {
     logging.DEBUG: "🐛",

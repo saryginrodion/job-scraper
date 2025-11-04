@@ -1,12 +1,12 @@
 import asyncio
 import logging
 
-from core.interfaces.scraper import IScraper
-from core.interfaces.vacancy_notifier import IVacancyNotifier
-from core.interfaces.vacancy_repository import IVacancyRepository
-from core.types.vacancy import Vacancy
-from utils.exception_suppress import async_exception_suppress
-from utils.remove_duplicates import remove_duplicates
+from src.core.interfaces.scraper import IScraper
+from src.core.interfaces.vacancy_notifier import IVacancyNotifier
+from src.core.interfaces.vacancy_repository import IVacancyRepository
+from src.core.types.vacancy import Vacancy
+from src.utils.exception_suppress import async_exception_suppress
+from src.utils.remove_duplicates import remove_duplicates
 
 logger = logging.getLogger(__name__)
 

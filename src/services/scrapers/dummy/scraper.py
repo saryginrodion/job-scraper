@@ -4,10 +4,10 @@ from uuid import uuid4
 
 from httpx import AsyncClient
 
-from core.interfaces.vacancy_repository import IVacancyRepository
-from core.types.vacancy import Vacancy
-from services.scrapers.BaseScraper import BaseScraper
-from utils.retry import async_retry
+from src.core.interfaces.vacancy_repository import IVacancyRepository
+from src.core.types.vacancy import Vacancy
+from src.services.scrapers.BaseScraper import BaseScraper
+from src.utils.retry import async_retry
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class DummyScraper(BaseScraper):
 
     @override
     @async_retry(retries=3)
-    async def _fetch_vacancies(self, url: str, page: int) -> list[Vacancy]:
+    async def fetch_vacancies(self, url: str, page: int) -> list[Vacancy]:
         if page >= 3:
             return []
 

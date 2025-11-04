@@ -5,7 +5,7 @@ from typing import Literal
 import httpx
 from pydantic import BaseModel
 
-from utils.retry import async_retry
+from src.utils.retry import async_retry
 
 logger = logging.getLogger(__name__)
 

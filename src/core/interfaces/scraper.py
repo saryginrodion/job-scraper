@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from core.types.vacancy import Vacancy
+from src.core.types.vacancy import Vacancy
 
 
 class IScraper(ABC):

@@ -1,8 +1,8 @@
-from core.interfaces.vacancy_notifier import IVacancyNotifier
-from core.types.vacancy import Vacancy
-from utils.chunk_iterator import iterate_by_chunks
-from utils.telegram import escape_markdown_v2
-from utils.telegram_sender import TelegramSender
+from src.core.interfaces.vacancy_notifier import IVacancyNotifier
+from src.core.types.vacancy import Vacancy
+from src.utils.chunk_iterator import iterate_by_chunks
+from src.utils.telegram import escape_markdown_v2
+from src.utils.telegram_sender import TelegramSender
 
 
 class TelegramNotifier(IVacancyNotifier):

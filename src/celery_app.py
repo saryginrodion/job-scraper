@@ -1,0 +1,19 @@
+import logging  # noqa: I001
+
+from celery import Celery
+
+from src.env.env_vars import env
+
+logger = logging.getLogger(__name__)
+
+app = Celery("tasks", broker=env.celery_broker_url, backend=env.celery_backend_url)
+
+app.autodiscover_tasks(["src.celery.tasks.orchestrator_tasks"])
+
+app.conf.beat_schedule = {
+    "scrape-and-notify-15m": {
+        "task": "src.celery.tasks.orchestrator_tasks.scrape_and_notify",
+        "schedule": 15 * 60,
+        "args": (),
+    },
+}

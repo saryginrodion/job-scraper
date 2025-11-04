@@ -4,11 +4,11 @@ from typing import Any, override
 
 from httpx import AsyncClient
 
-from core.errors.scraper import ScraperFetchError
-from core.interfaces.vacancy_repository import IVacancyRepository
-from core.types.vacancy import Vacancy
-from services.scrapers.BaseScraper import BaseScraper
-from utils.retry import async_retry
+from src.core.errors.scraper import ScraperFetchError
+from src.core.interfaces.vacancy_repository import IVacancyRepository
+from src.core.types.vacancy import Vacancy
+from src.services.scrapers.BaseScraper import BaseScraper
+from src.utils.retry import async_retry
 
 logger = logging.getLogger(__name__)
 

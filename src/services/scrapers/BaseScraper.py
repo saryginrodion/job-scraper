@@ -4,12 +4,10 @@ from abc import abstractmethod
 from collections.abc import Iterator
 from typing import override
 
-from httpx import AsyncClient
-
-from core.interfaces.scraper import IScraper
-from core.interfaces.vacancy_repository import IVacancyRepository
-from core.types.vacancy import Vacancy
-from utils.exception_suppress import async_exception_suppress
+from src.core.interfaces.scraper import IScraper
+from src.core.interfaces.vacancy_repository import IVacancyRepository
+from src.core.types.vacancy import Vacancy
+from src.utils.exception_suppress import async_exception_suppress
 
 
 class BaseScraper(IScraper):

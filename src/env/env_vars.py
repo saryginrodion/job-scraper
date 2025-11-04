@@ -8,6 +8,9 @@ LogLevel = Literal["DEBUG", "WARNING", "INFO", "ERROR", "CRITICAL"]
 class EnvironSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
+    celery_broker_url: str
+    celery_backend_url: str
+
     mongodb_url: MongoDsn
     log_level: LogLevel = "DEBUG"
 

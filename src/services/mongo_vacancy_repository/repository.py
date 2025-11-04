@@ -1,8 +1,8 @@
 from pymongo.asynchronous.database import AsyncDatabase
 
-from core.interfaces.vacancy_repository import IVacancyRepository
-from core.types.vacancy import Vacancy
-from services.mongo_vacancy_repository.dto import VacancyDTO
+from src.core.interfaces.vacancy_repository import IVacancyRepository
+from src.core.types.vacancy import Vacancy
+from src.services.mongo_vacancy_repository.dto import VacancyDTO
 
 
 class MongoVacancyRepository(IVacancyRepository):
