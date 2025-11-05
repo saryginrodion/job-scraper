@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 LogLevel = Literal["DEBUG", "WARNING", "INFO", "ERROR", "CRITICAL"]
 
 class EnvironSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     celery_broker_url: str
     celery_backend_url: str
