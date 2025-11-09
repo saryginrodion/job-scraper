@@ -1,4 +1,72 @@
 services:
+  job-scraper-celery-beat:
+    build:
+      context: .
+    command: "uv run celery -A src.celery_app beat -l INFO"
+
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_BACKEND_URL: redis://redis:6379/1
+      
+      MONGODB_URL: mongodb://admin:admin@localhost:27017/vacancies?authSource=admin
+      LOG_LEVEL: INFO
+      
+      LOG_TG_LEVEL: WARNING
+      LOG_TG_TOKEN: "${LOG_TG_TOKEN}"
+      LOG_TG_CHAT: "${LOG_TG_CHAT}"
+      
+      TG_NOTIFIER_TOKEN: "${TG_NOTIFIER_TOKEN}"
+      TG_NOTIFIER_CHAT: "${TG_NOTIFIER_CHAT}"
+      TG_NOTIFIER_CHAT_VERBOSE: "${TG_NOTIFIER_CHAT_VERBOSE}"
+
+    depends_on:
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      kafka_setup:
+        condition: service_completed_successfully
+
+  job-scraper-celery:
+    build:
+      context: .
+    command: "uv run celery -A src.celery_app worker -E -l INFO"
+
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_BACKEND_URL: redis://redis:6379/1
+      
+      MONGODB_URL: mongodb://admin:admin@localhost:27017/vacancies?authSource=admin
+      LOG_LEVEL: INFO
+      
+      LOG_TG_LEVEL: WARNING
+      LOG_TG_TOKEN: "${LOG_TG_TOKEN}"
+      LOG_TG_CHAT: "${LOG_TG_CHAT}"
+      
+      TG_NOTIFIER_TOKEN: "${TG_NOTIFIER_TOKEN}"
+      TG_NOTIFIER_CHAT: "${TG_NOTIFIER_CHAT}"
+      TG_NOTIFIER_CHAT_VERBOSE: "${TG_NOTIFIER_CHAT_VERBOSE}"
+
+    depends_on:
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      kafka_setup:
+        condition: service_completed_successfully
+
+  
+  kafka_setup:
+    build:
+      context: ./kafka_setup/
+
+    environment:
+      kafka_servers: "kafka:9092"
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+
   mongodb:
     image: "mongo:${MONGO_VERSION:-latest}"
     container_name: mongodb
@@ -7,10 +75,35 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: admin
       MONGO_INITDB_DATABASE: vacancies
     ports:
-      - "27017:27017"   # host:container — change the left side to set host port
+      - "27017:27017"
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
+
+  kafka:
+    image: apache/kafka:4.1.0
+
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+
+    healthcheck:
+      test: nc -z kafka 9092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    
 
   redis:
     image: redis:latest
@@ -25,3 +118,7 @@ volumes:
   mongo_data:
 
   redis_data:
+
+networks:
+  job_scraper_net:
+    driver: bridge

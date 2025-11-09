@@ -1,0 +1,10 @@
+[project]
+name = "kafka-setup"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "kafka-python>=2.2.15",
+    "pydantic-settings>=2.11.0",
+]
