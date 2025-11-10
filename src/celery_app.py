@@ -14,7 +14,7 @@ app.autodiscover_tasks(["src.celery.tasks.orchestrator_tasks"])
 
 app.conf.beat_schedule = {
     "scrape-and-notify-15m": {
-        "task": "src.celery.tasks.orchestrator_tasks.scrape_and_notify",
+        "task": "orchestrator.scrape_and_notify",
         "schedule": 15 * 60,
         "args": (),
     },
