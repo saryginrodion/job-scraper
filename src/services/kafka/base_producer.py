@@ -1,15 +1,16 @@
 import logging
+from typing import override
 
 from aiokafka import AIOKafkaProducer
 from pydantic import BaseModel
 
-from src.utils.exception_suppress import async_exception_suppress
+from src.core.interfaces.async_closable import AsyncClosable
 from src.utils.retry import async_retry
 
 logger = logging.getLogger(__name__)
 
 
-class BaseProducer[T: BaseModel]:
+class BaseProducer[T: BaseModel](AsyncClosable):
     TOPIC_NAME: str | None = None
 
     def __init__(self, producer: AIOKafkaProducer) -> None:
@@ -18,7 +19,7 @@ class BaseProducer[T: BaseModel]:
     @property
     def topic_name(self) -> str:
         if self.TOPIC_NAME is None:
-            raise NotImplementedError("TOPIC_NAME is null. Override it in subclasses")
+            raise NotImplementedError
 
         return self.TOPIC_NAME
 
@@ -29,4 +30,8 @@ class BaseProducer[T: BaseModel]:
             logger.info(f"[{self.__class__.__name__}] Sent message to topic {self.topic_name}")
         except Exception as e:
             logger.warning(f"[{self.__class__.__name__}] Failed sending to topic {self.topic_name}. Exception: {e}")
-            raise e
+            raise
+
+    @override
+    async def aclose(self) -> None:
+        await self._producer.stop()

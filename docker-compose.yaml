@@ -4,22 +4,16 @@ services:
       context: .
     command: "uv run celery -A src.celery_app beat -l INFO"
 
+    env_file: .env
+
     environment:
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_BACKEND_URL: redis://redis:6379/1
 
-      KAFKA_SERVERS: "kafka:29092"
+      KAFKA_NOTIFIER_SERVERS: "kafka:29092"
 
       MONGODB_URL: mongodb://admin:admin@mongodb:27017/vacancies?authSource=admin
       LOG_LEVEL: INFO
-      
-      LOG_TG_LEVEL: WARNING
-      LOG_TG_TOKEN: "${LOG_TG_TOKEN}"
-      LOG_TG_CHAT: "${LOG_TG_CHAT}"
-      
-      TG_NOTIFIER_TOKEN: "${TG_NOTIFIER_TOKEN}"
-      TG_NOTIFIER_CHAT: "${TG_NOTIFIER_CHAT}"
-      TG_NOTIFIER_CHAT_VERBOSE: "${TG_NOTIFIER_CHAT_VERBOSE}"
 
     depends_on:
       redis:
@@ -28,28 +22,51 @@ services:
         condition: service_started
       kafka_setup:
         condition: service_completed_successfully
+
+    networks:
+      - job_scraper_net
 
   job-scraper-celery:
     build:
       context: .
     command: "uv run celery -A src.celery_app worker -E -l INFO"
 
+    env_file: .env
+
     environment:
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_BACKEND_URL: redis://redis:6379/1
-      
-      KAFKA_SERVERS: "kafka:29092"
+
+      KAFKA_NOTIFIER_SERVERS: "kafka:29092"
 
       MONGODB_URL: mongodb://admin:admin@mongodb:27017/vacancies?authSource=admin
       LOG_LEVEL: INFO
-      
-      LOG_TG_LEVEL: WARNING
-      LOG_TG_TOKEN: "${LOG_TG_TOKEN}"
-      LOG_TG_CHAT: "${LOG_TG_CHAT}"
-      
-      TG_NOTIFIER_TOKEN: "${TG_NOTIFIER_TOKEN}"
-      TG_NOTIFIER_CHAT: "${TG_NOTIFIER_CHAT}"
-      TG_NOTIFIER_CHAT_VERBOSE: "${TG_NOTIFIER_CHAT_VERBOSE}"
+
+    depends_on:
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      kafka_setup:
+        condition: service_completed_successfully
+    networks:
+      - job_scraper_net
+
+  job-scraper-on-start:
+    build:
+      context: .
+    command: "uv run -m src.main"
+
+    env_file: .env
+
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_BACKEND_URL: redis://redis:6379/1
+
+      KAFKA_NOTIFIER_SERVERS: "kafka:29092"
+
+      MONGODB_URL: mongodb://admin:admin@mongodb:27017/vacancies?authSource=admin
+      LOG_LEVEL: INFO
 
     depends_on:
       redis:
@@ -59,6 +76,8 @@ services:
       kafka_setup:
         condition: service_completed_successfully
 
+    networks:
+      - job_scraper_net
   
   kafka_setup:
     build:
@@ -70,6 +89,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+    networks:
+      - job_scraper_net
 
   mongodb:
     image: "mongo:${MONGO_VERSION:-latest}"
@@ -83,6 +104,9 @@ services:
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
+    
+    networks:
+      - job_scraper_net
 
   kafka:
     image: apache/kafka:4.1.0
@@ -111,6 +135,9 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
+
+    networks:
+      - job_scraper_net
     
 
   redis:
@@ -121,6 +148,8 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
+    networks:
+        - job_scraper_net
 
 volumes:
   mongo_data:

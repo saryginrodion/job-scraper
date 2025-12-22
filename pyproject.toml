@@ -9,6 +9,7 @@ dependencies = [
     "aiokafka>=0.12.0",
     "bs4>=0.0.2",
     "celery>=5.5.3",
+    "dotenv>=0.9.9",
     "httpx>=0.28.1",
     "pydantic>=2.12.3",
     "pydantic-settings>=2.11.0",

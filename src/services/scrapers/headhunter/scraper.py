@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from src.core.errors.scraper import ScraperFetchError
 from src.core.interfaces.vacancy_repository import IVacancyRepository
 from src.core.types.vacancy import Vacancy
+from src.env.hh_scraper_env import HeadHunterScraperEnvironSettings
 from src.services.scrapers.BaseScraper import BaseScraper
 from src.utils.retry import async_retry
 
@@ -17,14 +18,6 @@ logger = logging.getLogger(__name__)
 
 class HeadHunterScraper(BaseScraper):
     BASE_URL = "https://hh.ru"
-
-    SCRAPING_URLS = [
-        # 1–3 years, Python FastAPI, remote
-        "/search/vacancy?items_on_page=100&L_save_area=true&hhtmFrom=vacancy_search_filter&experience=between1And3&search_field=name&search_field=company_name&search_field=description&work_format=REMOTE&text=Python+FastAPI&enable_snippets=false",
-
-        # 3–6 years, FastAPI, remote
-        "/search/vacancy?ored_clusters=true&items_on_page=100&hhtmFrom=vacancy_search_list&hhtmFromLabel=vacancy_search_line&experience=between3And6&search_field=name&search_field=company_name&search_field=description&work_format=REMOTE&text=FastAPI&enable_snippets=false",
-    ]
 
     HEADERS = {
         "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"),
@@ -38,9 +31,10 @@ class HeadHunterScraper(BaseScraper):
         "HH-Locale": "RU",
     }
 
-    def __init__(self, repository: IVacancyRepository) -> None:
+    def __init__(self, repository: IVacancyRepository, scraping_endpoints: list[str]) -> None:
         super().__init__(logger, repository)
 
+        self.scraping_endpoints = scraping_endpoints
         self._client = httpx.AsyncClient(
             headers=self.HEADERS,
             cookies=self.COOKIES,
@@ -50,7 +44,7 @@ class HeadHunterScraper(BaseScraper):
 
     @override
     def endpoints(self) -> list[str]:
-        return [f"{self.BASE_URL}{endpoint}" for endpoint in self.SCRAPING_URLS]
+        return [f"{self.BASE_URL}{endpoint}" for endpoint in self.scraping_endpoints]
 
     def _extract_initial_state(self, html: str) -> dict | None:
         soup = BeautifulSoup(html, "html.parser")

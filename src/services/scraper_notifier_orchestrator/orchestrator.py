@@ -1,6 +1,8 @@
 import asyncio
 import logging
+from typing import override
 
+from src.core.interfaces.async_closable import AsyncClosable
 from src.core.interfaces.scraper import IScraper
 from src.core.interfaces.vacancy_notifier import IVacancyNotifier
 from src.core.interfaces.vacancy_repository import IVacancyRepository
@@ -11,7 +13,7 @@ from src.utils.remove_duplicates import remove_duplicates
 logger = logging.getLogger(__name__)
 
 
-class ScraperNotifierOrchestrator:
+class ScraperNotifierOrchestrator(AsyncClosable):
     def __init__(self, scrapers: list[IScraper], notifiers: list[IVacancyNotifier], vacancy_repostory: IVacancyRepository) -> None:
         self._scrapers = scrapers
         self._notifiers = notifiers
@@ -41,12 +43,7 @@ class ScraperNotifierOrchestrator:
     async def notify(self, vacancies: list[Vacancy]) -> None:
         logger.info(f"Starting notifying about {len(vacancies)} vacancies")
 
-        coroutines = [
-            async_exception_suppress(Exception, logger=logger, loglevel=logging.WARNING)(
-                n.notify
-            )(vacancies)
-            for n in self._notifiers
-        ]
+        coroutines = [async_exception_suppress(Exception, logger=logger, loglevel=logging.WARNING)(n.notify)(vacancies) for n in self._notifiers]
 
         await asyncio.gather(*coroutines)
 
@@ -64,3 +61,21 @@ class ScraperNotifierOrchestrator:
             logger.info("Ended scrape_and_notify")
         except Exception as e:
             logger.error(e)
+
+    async def _close_scrapers(self) -> None:
+        for scraper in self._scrapers:
+            if isinstance(scraper, AsyncClosable):
+                await scraper.aclose()
+
+    async def _close_notifiers(self) -> None:
+        for scraper in self._scrapers:
+            if isinstance(scraper, AsyncClosable):
+                await scraper.aclose()
+
+    @override
+    async def aclose(self) -> None:
+        if isinstance(self._repository, AsyncClosable):
+            await self._repository.aclose()
+
+        await self._close_notifiers()
+        await self._close_scrapers()

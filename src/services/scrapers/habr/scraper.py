@@ -15,15 +15,11 @@ logger = logging.getLogger(__name__)
 
 class HabrScraper(BaseScraper):
     BASE_URL = "https://career.habr.com"
-    SCRAPING_URLS = [
-        "/api/frontend/vacancies?q=Python&sort=relevance&type=all&currency=RUR&s[]=2&s[]=4&s[]=82&s[]=7&s[]=84&s[]=73&s[]=85&s[]=72",
-        "/api/frontend/vacancies?q=FastAPI&sort=relevance&type=all&currency=RUR&s[]=2&s[]=4&s[]=82&s[]=7&s[]=84&s[]=73&s[]=85&s[]=72",
-        "/api/frontend/vacancies?sort=relevance&type=all&skills[]=1349&remote=true&currency=RUR&s[]=2&s[]=3&s[]=4&s[]=82&s[]=72&s[]=5&s[]=75&s[]=6&s[]=1&s[]=77&s[]=7&s[]=83&s[]=84&s[]=73&s[]=8&s[]=85&s[]=86&s[]=188&s[]=178&s[]=106",
-    ]
 
-    def __init__(self, repository: IVacancyRepository) -> None:
+    def __init__(self, repository: IVacancyRepository, scraping_endpoints: list[str]) -> None:
         super().__init__(logger, repository)
 
+        self.scraping_endpoints = scraping_endpoints
         self._client = AsyncClient()
 
     @override
@@ -63,5 +59,5 @@ class HabrScraper(BaseScraper):
     def endpoints(self) -> list[str]:
         return [
             f"{self.BASE_URL}{endpoint}"
-            for endpoint in self.SCRAPING_URLS
+            for endpoint in self.scraping_endpoints
         ]
