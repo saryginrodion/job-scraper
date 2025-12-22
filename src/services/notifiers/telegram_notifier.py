@@ -6,7 +6,7 @@ from src.utils.telegram_sender import TelegramSender
 
 
 class TelegramNotifier(IVacancyNotifier):
-    VACANCIES_PER_MESSAGE = 13
+    VACANCIES_PER_MESSAGE = 15
 
     def __init__(self, telegram_sender: TelegramSender) -> None:
         self._sender = telegram_sender
@@ -21,6 +21,5 @@ class TelegramNotifier(IVacancyNotifier):
 
     @staticmethod
     def vacancy_view_str(vacancy: Vacancy) -> str:
-        return f"""📭 {escape_markdown_v2(vacancy.name)}\n
-[{escape_markdown_v2(vacancy.source_url)}]({escape_markdown_v2(vacancy.source_url)})
+        return f"""📭 [{escape_markdown_v2(vacancy.name)}]({escape_markdown_v2(vacancy.source_url)})
 🛠️ **ID**: `{escape_markdown_v2(vacancy.id)}`"""
